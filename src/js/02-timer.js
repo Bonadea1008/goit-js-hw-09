@@ -1,14 +1,16 @@
-import flatpickr from 'flatpickr';
-import 'flatpickr/dist/flatpickr.min.css';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
 const refs = {
   myInput: document.getElementById('datetime-picker'),
-  startBtn: document.querySelector('button[data-start]'),
+  startBtn: document.querySelector('[data-start]'),
+  timerDays: document.querySelector('[data-days]'),
+  timerHours: document.querySelector('[data-hours]'),
+  timerMinutes: document.querySelector('[data-minutes]'),
+  timerSeconds: document.querySelector('[data-seconds]'),
 };
-let selectedDates = null;
-
+let timerId = null;
 const options = {
   enableTime: true,
   time_24hr: true,
@@ -19,46 +21,70 @@ const options = {
       Notify.failure('Please choose a date in the future');
     } else {
       options.defaultDate = selectedDates[0];
-      refs.startBtn.removeAttribute('disabled');
+      refs.startBtn.disabled = false;
     }
-    console.log(selectedDates[0].getTime());
   },
 };
 const fp = flatpickr(refs.myInput, options);
 
-const timer = {
-  start() {
-    const startTime = selectedDates[0];
-    console.log(startTime);
-    // setInterval(() => console.log(startTime - Date.now), 1000);
-  },
-};
+refs.startBtn.disabled = true;
 
-timer.start();
+refs.startBtn.addEventListener('click', onStartBtnClick);
 
-refs.startBtn.setAttribute('disabled', '');
+// //по натисканню на старт запускаэться таймер. від даного часу відняти поточний, запихнути у йункцію convertMs
+// const selectedDate = fp.selectedDates[0];
+
+// function onStartBtnClick(evt) {
+//   timerId = setInterval(() => {
+//     const startTime = new Date();
+//     const countdown = selectedDate - startTime;
+//     refs.startBtn.disabled = true;
+
+//     if (countdown < 0) {
+//       clearInterval(timerId);
+//       return;
+//     }
+//     updateTimerFace(convertMs(countdown));
+//   }, 1_000);
+// }
 
 function convertMs(ms) {
-  // Number of milliseconds per unit of time
   const second = 1000;
   const minute = second * 60;
   const hour = minute * 60;
   const day = hour * 24;
 
-  // Remaining days
   const days = Math.floor(ms / day);
-  // Remaining hours
   const hours = Math.floor((ms % day) / hour);
-  // Remaining minutes
   const minutes = Math.floor(((ms % day) % hour) / minute);
-  // Remaining seconds
   const seconds = Math.floor((((ms % day) % hour) % minute) / second);
 
   return { days, hours, minutes, seconds };
 }
 
-console.log(convertMs(2000)); // {days: 0, hours: 0, minutes: 0, seconds: 2}
-console.log(convertMs(140000)); // {days: 0, hours: 0, minutes: 2, seconds: 20}
-console.log(convertMs(24140000)); // {days: 0, hours: 6 minutes: 42, seconds: 20}
+function addLeadingZero(value) {
+  return String(value).padStart(2, 0);
+}
 
-// Напиши функцію addLeadingZero(value), яка використовує метод padStart() і перед рендерингом інтефрейсу форматує значення.
+function updateTimerFields({ days, hours, minutes, seconds }) {
+  refs.timerDays.textContent = days;
+  refs.timerHours.textContent = addLeadingZero(hours);
+  refs.timerMinutes.textContent = addLeadingZero(minutes);
+  refs.timerSeconds.textContent = addLeadingZero(seconds);
+}
+
+function onStartBtnClick() {
+  const selectedDate = fp.selectedDates[0];
+
+  timerId = setInterval(() => {
+    const startTime = new Date();
+    const countdown = selectedDate - startTime;
+    refs.startBtn.disabled = true;
+
+    if (countdown < 0) {
+      clearInterval(timerId);
+      return;
+    }
+    updateTimerFields(convertMs(countdown));
+  }, 1000);
+}
