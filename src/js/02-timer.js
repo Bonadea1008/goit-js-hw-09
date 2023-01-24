@@ -31,23 +31,6 @@ refs.startBtn.disabled = true;
 
 refs.startBtn.addEventListener('click', onStartBtnClick);
 
-// //по натисканню на старт запускаэться таймер. від даного часу відняти поточний, запихнути у йункцію convertMs
-// const selectedDate = fp.selectedDates[0];
-
-// function onStartBtnClick(evt) {
-//   timerId = setInterval(() => {
-//     const startTime = new Date();
-//     const countdown = selectedDate - startTime;
-//     refs.startBtn.disabled = true;
-
-//     if (countdown < 0) {
-//       clearInterval(timerId);
-//       return;
-//     }
-//     updateTimerFace(convertMs(countdown));
-//   }, 1_000);
-// }
-
 function convertMs(ms) {
   const second = 1000;
   const minute = second * 60;
